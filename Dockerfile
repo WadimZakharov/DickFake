@@ -1,8 +1,5 @@
 FROM python:3.10.12
 
-ARG bot_token=token
-ENV bot_token=${bot_token}
-
 WORKDIR /home
 
 ADD requirements.txt /home/bot/
