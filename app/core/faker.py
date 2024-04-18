@@ -11,7 +11,7 @@ from mediapipe.tasks.python import vision
 from mediapipe.tasks.python.components.containers.keypoint \
                                     import NormalizedKeypoint
 
-from app.datalayer.schemas import Eyes
+from app.datalayer.schemas import Eyes, NotEyesException
 from .utils import normalized_to_pixel_coordinates, \
                         overlay_image_alpha, preprocess_dick
 
@@ -43,16 +43,15 @@ class Dickfake:
     def __call__(self, filename) -> str:
         inbox_path = os.path.join("/home/bot/inbox_images", filename)
         image = mp.Image.create_from_file(inbox_path)
-        try:
-            keypoints = self.detect_keypoints(image)
-            image = cv2.imread(inbox_path)
-            for keypoint in keypoints:
-                self.put_dick(keypoint, image)
-            sent_path = os.path.join("/home/bot/sent_images", filename)
-            cv2.imwrite(sent_path, image)
-        except Exception as e:
-            print(f"Error with file {self.dick_path}", e, )
-            sent_path = None
+        keypoints = self.detect_keypoints(image)
+        if len(keypoints) == 0:
+            raise NotEyesException
+        
+        image = cv2.imread(inbox_path)
+        for keypoint in keypoints:
+            self.put_dick(keypoint, image)
+        sent_path = os.path.join("/home/bot/sent_images", filename)
+        cv2.imwrite(sent_path, image)
 
         return sent_path
 
@@ -60,7 +59,6 @@ class Dickfake:
 
         height, width, _ = image.shape 
         dick_path = np.random.choice(self.dicks)
-        self.dick_path = dick_path
         dick = cv2.imread(dick_path)
         front_height, front_width, _ = dick.shape
         front_keys_n = [self.result_eggs[dick_path]['left'],

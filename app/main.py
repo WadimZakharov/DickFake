@@ -6,6 +6,7 @@ import uuid
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from app.core.faker import Dickfake
+from app.datalayer.schemas import NotEyesException
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -41,15 +42,20 @@ def build_dickfake(update: Update, context) -> None:
     filename = str(uuid.uuid4().hex) + ".jpg"
     inbox_file_path = os.path.join("/home/bot/inbox_images", filename)
     file.download(inbox_file_path)
-    sent_path = dickfake(filename)
-    if sent_path:
+    try:
+        sent_path = dickfake(filename)
         context.bot.send_photo(chat_id=update.message['chat']['id'],
                                photo=open(sent_path, 'rb'))
-        os.remove(inbox_file_path)
         os.remove(sent_path)
-    else:
+    except NotEyesException:
+        update.message.reply_text("Не нашел глаз на фото, попробуй прислать фото крупнее")
+
+    except Exception as e:
+        print("Error", e)
+        update.message.reply_text("Сорян, я заболел((")
+
+    finally:
         os.remove(inbox_file_path)
-        update.message.reply_text("Сорян, ошибка")
 
 
 def main() -> None:

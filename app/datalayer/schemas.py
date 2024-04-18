@@ -8,3 +8,7 @@ class Eyes:
     """eyes or eggs in the picture"""
     left: np.array
     right: np.array
+
+
+class NotEyesException(Exception):
+    """Exception"""
