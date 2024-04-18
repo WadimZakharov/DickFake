@@ -1,0 +1,9 @@
+secrets.txt
+.vscode
+__pycache__/
+venv/
+.env
+*.egg-info/
+.coverage
+.cache/
+.ipynb_checkpoints
